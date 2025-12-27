@@ -149,19 +149,6 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
       {/* Sub Header with Breadcrumbs */}
       <div className="bg-card border-b border-border px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <div className="w-10 h-10 rounded-full bg-muted overflow-hidden">
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center">
-                👤
-              </div>
-            )}
-          </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             {breadcrumbs.length === 0 ? (
               <>
