@@ -14,6 +14,9 @@ import CustomerSearch from "./pages/customers/CustomerSearch";
 import CustomerList from "./pages/customers/CustomerList";
 import GstReportSearch from "./pages/gst-reports/GstReportSearch";
 import GstReportList from "./pages/gst-reports/GstReportList";
+import InventoryManagement from "./pages/inventory/InventoryManagement";
+import GetInventorySearch from "./pages/inventory/GetInventorySearch";
+import GetInventoryList from "./pages/inventory/GetInventoryList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +39,9 @@ const App = () => (
             <Route path="/dashboard/customers/list" element={<CustomerList />} />
             <Route path="/dashboard/gst-reports" element={<GstReportSearch />} />
             <Route path="/dashboard/gst-reports/list" element={<GstReportList />} />
+            <Route path="/dashboard/inventory" element={<InventoryManagement />} />
+            <Route path="/dashboard/get-inventory" element={<GetInventorySearch />} />
+            <Route path="/dashboard/get-inventory/list" element={<GetInventoryList />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
