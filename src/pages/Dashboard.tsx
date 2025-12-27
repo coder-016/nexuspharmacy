@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ChevronRight,
@@ -45,6 +46,13 @@ const quickActions = [
 
 const Dashboard = () => {
   const { profile } = useAuth();
+  const navigate = useNavigate();
+
+  const handleQuickAction = (label: string) => {
+    if (label === "Get Inventory") {
+      navigate("/dashboard/get-inventory");
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -78,6 +86,7 @@ const Dashboard = () => {
         {quickActions.map((action, index) => (
           <div
             key={index}
+            onClick={() => handleQuickAction(action.label)}
             className={`bg-gradient-to-r ${action.color} rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-card transition-all group`}
           >
             <div className="w-12 h-12 rounded-full bg-card shadow-sm flex items-center justify-center text-2xl">
