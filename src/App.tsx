@@ -10,6 +10,8 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import CreateDistributor from "./pages/distributors/CreateDistributor";
 import GetDistributors from "./pages/distributors/GetDistributors";
+import CustomerSearch from "./pages/customers/CustomerSearch";
+import CustomerList from "./pages/customers/CustomerList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/distributors/create" element={<CreateDistributor />} />
             <Route path="/dashboard/distributors" element={<GetDistributors />} />
+            <Route path="/dashboard/customers" element={<CustomerSearch />} />
+            <Route path="/dashboard/customers/list" element={<CustomerList />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
