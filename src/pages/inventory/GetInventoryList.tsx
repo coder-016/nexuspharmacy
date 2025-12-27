@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import {
   Table,
@@ -18,71 +18,86 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface InventoryItem {
   id: string;
-  itemId: string;
-  itemName: string;
+  item_id: string;
+  item_name: string;
   category: string;
   unit: string;
-  totalStock: string;
-  batchNo: string;
-  stock: string;
-  minStock: string;
-  rack: string;
-  productType: string;
-  price: string;
-  gst: string;
+  stock: number;
+  batch_no: string;
+  min_stock: number;
+  rack: string | null;
+  product_type: string | null;
+  price: number | null;
+  gst: string | null;
 }
 
-// Mock data
-const generateMockData = (): InventoryItem[] => {
-  return Array.from({ length: 50 }, (_, i) => ({
-    id: `${i + 1}`,
-    itemId: `XXXX`,
-    itemName: "LOREM IPSUM",
-    category: "LOREM IPSUM",
-    unit: "XXXX",
-    totalStock: "XXXXXX",
-    batchNo: "XXXXX",
-    stock: "XXXX",
-    minStock: "XXX",
-    rack: "XXXX",
-    productType: "Lorem Ipsum",
-    price: "₹ XXX",
-    gst: "GSTR1",
-  }));
-};
-
 const GetInventoryList = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [itemName, setItemName] = useState(searchParams.get("itemName") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<InventoryItem[]>([]);
   const itemsPerPage = 14;
 
-  const allItems = generateMockData();
-  
-  // Filter items based on search params
-  const filteredItems = allItems.filter((item) => {
-    const matchesName = !itemName || item.itemName.toLowerCase().includes(itemName.toLowerCase());
-    const matchesCategory = !category || item.category.toLowerCase().includes(category.toLowerCase());
-    return matchesName && matchesCategory;
-  });
+  const fetchItems = async () => {
+    if (!user) return;
+    setLoading(true);
 
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    let query = supabase
+      .from("inventory")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (itemName) {
+      query = query.ilike("item_name", `%${itemName}%`);
+    }
+    if (category) {
+      query = query.ilike("category", `%${category}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch inventory",
+        variant: "destructive",
+      });
+    } else if (data) {
+      setItems(data);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, [user]);
+
+  const totalPages = Math.ceil(items.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedItems = items.slice(startIndex, startIndex + itemsPerPage);
 
   const handleSearch = () => {
     setCurrentPage(1);
+    fetchItems();
   };
 
   const handleGetAll = () => {
     setItemName("");
     setCategory("");
     setCurrentPage(1);
+    fetchItems();
   };
 
   const getPageNumbers = () => {
@@ -146,37 +161,48 @@ const GetInventoryList = () => {
           <div className="border-b border-border px-4 py-3">
             <span className="font-medium text-foreground">Item Details</span>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="text-xs font-semibold uppercase text-primary">Item ID</TableHead>
-                <TableHead className="text-xs font-semibold uppercase text-primary">Item Name</TableHead>
-                <TableHead className="text-xs font-semibold uppercase text-primary">Category</TableHead>
-                <TableHead className="text-xs font-semibold uppercase text-primary">Unit</TableHead>
-                <TableHead className="text-xs font-semibold uppercase text-primary">Total Stock</TableHead>
-                <TableHead className="text-xs font-semibold uppercase text-primary"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedItems.map((item) => (
-                <TableRow key={item.id} className="hover:bg-muted/30">
-                  <TableCell className="text-sm">{item.itemId}</TableCell>
-                  <TableCell className="text-sm">{item.itemName}</TableCell>
-                  <TableCell className="text-sm">{item.category}</TableCell>
-                  <TableCell className="text-sm">{item.unit}</TableCell>
-                  <TableCell className="text-sm">{item.totalStock}</TableCell>
-                  <TableCell>
-                    <button
-                      onClick={() => setSelectedItem(item)}
-                      className="text-primary font-medium text-sm hover:underline"
-                    >
-                      VIEW DETAILS
-                    </button>
-                  </TableCell>
+          
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : items.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              No inventory items found. Add items from the Inventory page.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="text-xs font-semibold uppercase text-primary">Item ID</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase text-primary">Item Name</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase text-primary">Category</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase text-primary">Unit</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase text-primary">Total Stock</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase text-primary"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paginatedItems.map((item) => (
+                  <TableRow key={item.id} className="hover:bg-muted/30">
+                    <TableCell className="text-sm">{item.item_id}</TableCell>
+                    <TableCell className="text-sm">{item.item_name}</TableCell>
+                    <TableCell className="text-sm">{item.category}</TableCell>
+                    <TableCell className="text-sm">{item.unit}</TableCell>
+                    <TableCell className="text-sm">{item.stock}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => setSelectedItem(item)}
+                        className="text-primary font-medium text-sm hover:underline"
+                      >
+                        VIEW DETAILS
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
 
         {/* Pagination */}
@@ -225,7 +251,7 @@ const GetInventoryList = () => {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">
-              # 0225280278
+              # {selectedItem?.item_id}
             </DialogTitle>
           </DialogHeader>
           
@@ -238,67 +264,67 @@ const GetInventoryList = () => {
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Item ID</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      {selectedItem.itemId}
+                      {selectedItem.item_id}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Item Name</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      Lorem Ipsum
+                      {selectedItem.item_name}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Category</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      Lorem Ipsum
+                      {selectedItem.category}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Batch No</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      XXXXXX
+                      {selectedItem.batch_no}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Unit</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      XXXX
+                      {selectedItem.unit}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Stock</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      XXXX
+                      {selectedItem.stock}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Minimum Stock</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      XXX
+                      {selectedItem.min_stock}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Rack</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      XXXX
+                      {selectedItem.rack || "-"}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Product type</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      Lorem Ipsum
+                      {selectedItem.product_type || "-"}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">Price</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      ₹ XXX
+                      {selectedItem.price ? `₹ ${selectedItem.price}` : "-"}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm text-muted-foreground">GST</label>
                     <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm">
-                      GSTR1
+                      {selectedItem.gst || "-"}
                     </div>
                   </div>
                 </div>
@@ -327,17 +353,17 @@ const GetInventoryList = () => {
                       </TableHeader>
                       <TableBody>
                         <TableRow>
-                          <TableCell className="text-sm">XXXX</TableCell>
-                          <TableCell className="text-sm">Lorem Ipsum</TableCell>
-                          <TableCell className="text-sm">Lorem Ipsum</TableCell>
-                          <TableCell className="text-sm">XXXXX</TableCell>
-                          <TableCell className="text-sm">XXXX</TableCell>
-                          <TableCell className="text-sm">XXXX</TableCell>
-                          <TableCell className="text-sm">XXX</TableCell>
-                          <TableCell className="text-sm">XXXX</TableCell>
-                          <TableCell className="text-sm">Lorem Ipsum</TableCell>
-                          <TableCell className="text-sm">₹ XXX</TableCell>
-                          <TableCell className="text-sm">GSTR1</TableCell>
+                          <TableCell className="text-sm">{selectedItem.item_id}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.item_name}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.category}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.batch_no}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.unit}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.stock}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.min_stock}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.rack || "-"}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.product_type || "-"}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.price ? `₹ ${selectedItem.price}` : "-"}</TableCell>
+                          <TableCell className="text-sm">{selectedItem.gst || "-"}</TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>

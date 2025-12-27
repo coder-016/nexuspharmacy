@@ -50,6 +50,60 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory: {
+        Row: {
+          batch_no: string
+          category: string
+          created_at: string
+          gst: string | null
+          id: string
+          item_id: string
+          item_name: string
+          min_stock: number
+          price: number | null
+          product_type: string | null
+          rack: string | null
+          stock: number
+          unit: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_no: string
+          category: string
+          created_at?: string
+          gst?: string | null
+          id?: string
+          item_id: string
+          item_name: string
+          min_stock?: number
+          price?: number | null
+          product_type?: string | null
+          rack?: string | null
+          stock?: number
+          unit: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_no?: string
+          category?: string
+          created_at?: string
+          gst?: string | null
+          id?: string
+          item_id?: string
+          item_name?: string
+          min_stock?: number
+          price?: number | null
+          product_type?: string | null
+          rack?: string | null
+          stock?: number
+          unit?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
