@@ -188,6 +188,219 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_order_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          item_name: string
+          purchase_order_id: string
+          quantity: number
+          remark: string | null
+          total_price: number | null
+          unit: string
+          unit_price: number | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          item_name: string
+          purchase_order_id: string
+          quantity?: number
+          remark?: string | null
+          total_price?: number | null
+          unit: string
+          unit_price?: number | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          item_name?: string
+          purchase_order_id?: string
+          quantity?: number
+          remark?: string | null
+          total_price?: number | null
+          unit?: string
+          unit_price?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_order_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          payment_method: string
+          payment_status: string
+          purchase_order_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          payment_method: string
+          payment_status?: string
+          purchase_order_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          payment_method?: string
+          payment_status?: string
+          purchase_order_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_payments_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          created_at: string
+          expected_date: string
+          id: string
+          requisition_date: string
+          status: string
+          supplier_id: string
+          supplier_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expected_date: string
+          id?: string
+          requisition_date: string
+          status?: string
+          supplier_id: string
+          supplier_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expected_date?: string
+          id?: string
+          requisition_date?: string
+          status?: string
+          supplier_id?: string
+          supplier_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      receive_order_items: {
+        Row: {
+          batch_no: string
+          category: string | null
+          created_at: string
+          gst: string | null
+          id: string
+          item_id: string
+          item_name: string
+          price_per_quantity: number | null
+          receive_order_id: string
+          received_quantity: number
+          remark: string | null
+          unit: string
+          user_id: string
+        }
+        Insert: {
+          batch_no: string
+          category?: string | null
+          created_at?: string
+          gst?: string | null
+          id?: string
+          item_id: string
+          item_name: string
+          price_per_quantity?: number | null
+          receive_order_id: string
+          received_quantity?: number
+          remark?: string | null
+          unit: string
+          user_id: string
+        }
+        Update: {
+          batch_no?: string
+          category?: string | null
+          created_at?: string
+          gst?: string | null
+          id?: string
+          item_id?: string
+          item_name?: string
+          price_per_quantity?: number | null
+          receive_order_id?: string
+          received_quantity?: number
+          remark?: string | null
+          unit?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receive_order_items_receive_order_id_fkey"
+            columns: ["receive_order_id"]
+            isOneToOne: false
+            referencedRelation: "receive_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receive_orders: {
+        Row: {
+          created_at: string
+          delivery_status: string
+          id: string
+          payment_status: string
+          purchase_id: string
+          updated_at: string
+          user_id: string
+          vendor_name: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_status?: string
+          id?: string
+          payment_status?: string
+          purchase_id: string
+          updated_at?: string
+          user_id: string
+          vendor_name: string
+        }
+        Update: {
+          created_at?: string
+          delivery_status?: string
+          id?: string
+          payment_status?: string
+          purchase_id?: string
+          updated_at?: string
+          user_id?: string
+          vendor_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
