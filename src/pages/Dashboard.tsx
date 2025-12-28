@@ -51,6 +51,10 @@ const Dashboard = () => {
   const handleQuickAction = (label: string) => {
     if (label === "Get Inventory") {
       navigate("/dashboard/get-inventory");
+    } else if (label === "Create Purchase order") {
+      navigate("/dashboard/purchase-orders/create");
+    } else if (label === "Create Receive order") {
+      navigate("/dashboard/receive-orders/create");
     }
   };
 

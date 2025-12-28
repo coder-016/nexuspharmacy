@@ -17,6 +17,8 @@ import GstReportList from "./pages/gst-reports/GstReportList";
 import InventoryManagement from "./pages/inventory/InventoryManagement";
 import GetInventorySearch from "./pages/inventory/GetInventorySearch";
 import GetInventoryList from "./pages/inventory/GetInventoryList";
+import CreateReceiveOrder from "./pages/receive-orders/CreateReceiveOrder";
+import CreatePurchaseOrder from "./pages/purchase-orders/CreatePurchaseOrder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ const App = () => (
             <Route path="/dashboard/inventory" element={<InventoryManagement />} />
             <Route path="/dashboard/get-inventory" element={<GetInventorySearch />} />
             <Route path="/dashboard/get-inventory/list" element={<GetInventoryList />} />
+            <Route path="/dashboard/receive-orders/create" element={<CreateReceiveOrder />} />
+            <Route path="/dashboard/purchase-orders/create" element={<CreatePurchaseOrder />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
