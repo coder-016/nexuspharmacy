@@ -41,6 +41,9 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
   const [distributorsOpen, setDistributorsOpen] = useState(
     location.pathname.includes("/dashboard/distributors")
   );
+  const [receiveOrdersOpen, setReceiveOrdersOpen] = useState(
+    location.pathname.includes("/dashboard/receive-orders")
+  );
 
   useEffect(() => {
     if (!loading && !user) {
@@ -248,6 +251,53 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
                   to="/dashboard/distributors"
                   className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                     location.pathname === "/dashboard/distributors"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                  {sidebarOpen && <span>Get</span>}
+                </Link>
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Receive Orders Dropdown */}
+            <Collapsible open={receiveOrdersOpen} onOpenChange={setReceiveOrdersOpen}>
+              <CollapsibleTrigger
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                  location.pathname.includes("/dashboard/receive-orders")
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Package className="w-5 h-5 flex-shrink-0" />
+                {sidebarOpen && (
+                  <>
+                    <span className="flex-1 text-left">Receive Orders</span>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${
+                        receiveOrdersOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </>
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pl-8 space-y-1 mt-1">
+                <Link
+                  to="/dashboard/receive-orders/create"
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    location.pathname === "/dashboard/receive-orders/create"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Plus className="w-4 h-4" />
+                  {sidebarOpen && <span>Create</span>}
+                </Link>
+                <Link
+                  to="/dashboard/receive-orders"
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    location.pathname === "/dashboard/receive-orders"
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
