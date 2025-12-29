@@ -44,6 +44,9 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
   const [receiveOrdersOpen, setReceiveOrdersOpen] = useState(
     location.pathname.includes("/dashboard/receive-orders")
   );
+  const [billTemplateOpen, setBillTemplateOpen] = useState(
+    location.pathname.includes("/dashboard/bill-template")
+  );
 
   useEffect(() => {
     if (!loading && !user) {
@@ -90,7 +93,6 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
 
   const sidebarItems = [
     { icon: User, label: "Profile", path: "/dashboard/profile" },
-    { icon: FileText, label: "Bill Template", path: "/dashboard/bill-template" },
     { icon: Package, label: "Inventory", path: "/dashboard/inventory" },
     { icon: Users, label: "Customers", path: "/dashboard/customers" },
     { icon: BarChart3, label: "Statistics", path: "/dashboard/statistics" },
@@ -213,6 +215,53 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
                 {sidebarOpen && <span>{item.label}</span>}
               </Link>
             ))}
+
+            {/* Bill Template Dropdown */}
+            <Collapsible open={billTemplateOpen} onOpenChange={setBillTemplateOpen}>
+              <CollapsibleTrigger
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                  location.pathname.includes("/dashboard/bill-template")
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <FileText className="w-5 h-5 flex-shrink-0" />
+                {sidebarOpen && (
+                  <>
+                    <span className="flex-1 text-left">Bill Template</span>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${
+                        billTemplateOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </>
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pl-8 space-y-1 mt-1">
+                <Link
+                  to="/dashboard/bill-template/create"
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    location.pathname === "/dashboard/bill-template/create"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Plus className="w-4 h-4" />
+                  {sidebarOpen && <span>Create</span>}
+                </Link>
+                <Link
+                  to="/dashboard/bill-template"
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    location.pathname === "/dashboard/bill-template"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                  {sidebarOpen && <span>Get</span>}
+                </Link>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Distributors Dropdown */}
             <Collapsible open={distributorsOpen} onOpenChange={setDistributorsOpen}>
