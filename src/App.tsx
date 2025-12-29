@@ -20,6 +20,9 @@ import GetInventoryList from "./pages/inventory/GetInventoryList";
 import CreateReceiveOrder from "./pages/receive-orders/CreateReceiveOrder";
 import GetReceiveOrders from "./pages/receive-orders/GetReceiveOrders";
 import CreatePurchaseOrder from "./pages/purchase-orders/CreatePurchaseOrder";
+import GetPurchaseOrders from "./pages/purchase-orders/GetPurchaseOrders";
+import CreateBillTemplate from "./pages/bill-template/CreateBillTemplate";
+import GetBillTemplate from "./pages/bill-template/GetBillTemplate";
 import Statistics from "./pages/statistics/Statistics";
 import Profile from "./pages/profile/Profile";
 import NotFound from "./pages/NotFound";
@@ -50,6 +53,9 @@ const App = () => (
             <Route path="/dashboard/receive-orders/create" element={<CreateReceiveOrder />} />
             <Route path="/dashboard/receive-orders" element={<GetReceiveOrders />} />
             <Route path="/dashboard/purchase-orders/create" element={<CreatePurchaseOrder />} />
+            <Route path="/dashboard/purchase-orders" element={<GetPurchaseOrders />} />
+            <Route path="/dashboard/bill-template/create" element={<CreateBillTemplate />} />
+            <Route path="/dashboard/bill-template" element={<GetBillTemplate />} />
             <Route path="/dashboard/statistics" element={<Statistics />} />
             <Route path="/dashboard/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />

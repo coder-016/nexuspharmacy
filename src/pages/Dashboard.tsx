@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ChevronRight,
   Clipboard,
+  ChevronDown,
 } from "lucide-react";
 import {
   BarChart,
@@ -15,6 +17,12 @@ import {
 } from "recharts";
 import { useAuth } from "@/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const weeklyData = [
   { day: "M", value: 40 },
@@ -37,24 +45,27 @@ const stockData = [
   { id: "MED008", name: "Pantoprazole 40mg", minStock: "70", currentStock: "35" },
 ];
 
-const quickActions = [
-  { icon: "💵", label: "Create Bill", color: "from-emerald-100 to-emerald-50" },
-  { icon: "📦", label: "Get Inventory", color: "from-emerald-100 to-emerald-50" },
-  { icon: "📋", label: "Create Purchase order", color: "from-amber-100 to-amber-50" },
-  { icon: "📥", label: "Create Receive order", color: "from-amber-100 to-amber-50" },
-];
-
 const Dashboard = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const [purchaseDropdownOpen, setPurchaseDropdownOpen] = useState(false);
+  const [receiveDropdownOpen, setReceiveDropdownOpen] = useState(false);
 
-  const handleQuickAction = (label: string) => {
+  const handleQuickAction = (label: string, action?: string) => {
     if (label === "Get Inventory") {
       navigate("/dashboard/get-inventory");
     } else if (label === "Create Purchase order") {
-      navigate("/dashboard/purchase-orders/create");
+      if (action === "create") {
+        navigate("/dashboard/purchase-orders/create");
+      } else if (action === "get") {
+        navigate("/dashboard/purchase-orders");
+      }
     } else if (label === "Create Receive order") {
-      navigate("/dashboard/receive-orders/create");
+      if (action === "create") {
+        navigate("/dashboard/receive-orders/create");
+      } else if (action === "get") {
+        navigate("/dashboard/receive-orders");
+      }
     }
   };
 
@@ -87,19 +98,70 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-4 gap-4 mb-6">
-        {quickActions.map((action, index) => (
-          <div
-            key={index}
-            onClick={() => handleQuickAction(action.label)}
-            className={`bg-gradient-to-r ${action.color} rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-card transition-all group`}
-          >
-            <div className="w-12 h-12 rounded-full bg-card shadow-sm flex items-center justify-center text-2xl">
-              {action.icon}
-            </div>
-            <span className="font-medium text-foreground flex-1">{action.label}</span>
-            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+        {/* Create Bill */}
+        <div
+          className="bg-gradient-to-r from-emerald-100 to-emerald-50 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-card transition-all group"
+        >
+          <div className="w-12 h-12 rounded-full bg-card shadow-sm flex items-center justify-center text-2xl">
+            💵
           </div>
-        ))}
+          <span className="font-medium text-foreground flex-1">Create Bill</span>
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+        </div>
+
+        {/* Get Inventory */}
+        <div
+          onClick={() => handleQuickAction("Get Inventory")}
+          className="bg-gradient-to-r from-emerald-100 to-emerald-50 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-card transition-all group"
+        >
+          <div className="w-12 h-12 rounded-full bg-card shadow-sm flex items-center justify-center text-2xl">
+            📦
+          </div>
+          <span className="font-medium text-foreground flex-1">Get Inventory</span>
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+        </div>
+
+        {/* Purchase Order with Dropdown */}
+        <DropdownMenu open={purchaseDropdownOpen} onOpenChange={setPurchaseDropdownOpen}>
+          <DropdownMenuTrigger asChild>
+            <div className="bg-gradient-to-r from-amber-100 to-amber-50 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-card transition-all group">
+              <div className="w-12 h-12 rounded-full bg-card shadow-sm flex items-center justify-center text-2xl">
+                📋
+              </div>
+              <span className="font-medium text-foreground flex-1">Purchase order</span>
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 bg-card">
+            <DropdownMenuItem onClick={() => handleQuickAction("Create Purchase order", "create")}>
+              Create
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleQuickAction("Create Purchase order", "get")}>
+              Get
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Receive Order with Dropdown */}
+        <DropdownMenu open={receiveDropdownOpen} onOpenChange={setReceiveDropdownOpen}>
+          <DropdownMenuTrigger asChild>
+            <div className="bg-gradient-to-r from-amber-100 to-amber-50 rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-card transition-all group">
+              <div className="w-12 h-12 rounded-full bg-card shadow-sm flex items-center justify-center text-2xl">
+                📥
+              </div>
+              <span className="font-medium text-foreground flex-1">Receive order</span>
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 bg-card">
+            <DropdownMenuItem onClick={() => handleQuickAction("Create Receive order", "create")}>
+              Create
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleQuickAction("Create Receive order", "get")}>
+              Get
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
