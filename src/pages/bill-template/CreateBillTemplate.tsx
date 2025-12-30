@@ -11,6 +11,9 @@ import {
 import DashboardLayout from "@/components/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 import Logo from "@/components/Logo";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useReactToPrint } from "react-to-print";
 
 interface FieldConfig {
   enabled: boolean;
@@ -18,19 +21,15 @@ interface FieldConfig {
 }
 
 interface BillTemplateConfig {
-  // Pharmacy Information
+  templateName: string;
   pharmacyEnabled: boolean;
   logo: FieldConfig & { file?: File };
   address: FieldConfig;
   fssai: FieldConfig;
   gstin: FieldConfig;
-
-  // Drug License Information
   drugLicenseEnabled: boolean;
   dlNumber1: FieldConfig;
   dlNumber2: FieldConfig;
-
-  // Patient Information
   patientEnabled: boolean;
   patientName: FieldConfig;
   phoneNumber: FieldConfig;
@@ -38,8 +37,6 @@ interface BillTemplateConfig {
   gender: FieldConfig;
   patientAddress: FieldConfig;
   doctorName: FieldConfig;
-
-  // Item Information
   itemEnabled: boolean;
   itemName: FieldConfig;
   quantity: FieldConfig;
@@ -50,16 +47,12 @@ interface BillTemplateConfig {
   gstPercent: FieldConfig;
   discount: FieldConfig;
   total: FieldConfig;
-
-  // GST Information
   gstEnabled: boolean;
   gstPercentInfo: FieldConfig;
   taxAmount: FieldConfig;
   cgst: FieldConfig;
   sgst: FieldConfig;
   totalGst: FieldConfig;
-
-  // Payment Information
   paymentEnabled: boolean;
   amountPaid: FieldConfig;
   paymentMethod: FieldConfig;
@@ -67,8 +60,6 @@ interface BillTemplateConfig {
   totalDiscount: FieldConfig;
   totalBill: FieldConfig;
   outstandingAmount: FieldConfig;
-
-  // Declaration Information
   declarationEnabled: boolean;
   signature: FieldConfig & { file?: File };
   termsAndConditions: FieldConfig;
@@ -77,19 +68,25 @@ interface BillTemplateConfig {
 
 const CreateBillTemplate = () => {
   const { toast } = useToast();
+  const { user, profile } = useAuth();
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+  });
 
   const [config, setConfig] = useState<BillTemplateConfig>({
+    templateName: "",
     pharmacyEnabled: true,
     logo: { enabled: true },
     address: { enabled: true, value: "" },
     fssai: { enabled: true },
     gstin: { enabled: true },
-
     drugLicenseEnabled: true,
     dlNumber1: { enabled: true, value: "" },
     dlNumber2: { enabled: true, value: "" },
-
     patientEnabled: true,
     patientName: { enabled: true },
     phoneNumber: { enabled: true },
@@ -97,7 +94,6 @@ const CreateBillTemplate = () => {
     gender: { enabled: true },
     patientAddress: { enabled: true },
     doctorName: { enabled: false },
-
     itemEnabled: true,
     itemName: { enabled: true },
     quantity: { enabled: true },
@@ -108,14 +104,12 @@ const CreateBillTemplate = () => {
     gstPercent: { enabled: true },
     discount: { enabled: true },
     total: { enabled: true },
-
     gstEnabled: false,
     gstPercentInfo: { enabled: false },
     taxAmount: { enabled: false },
     cgst: { enabled: false },
     sgst: { enabled: false },
     totalGst: { enabled: false },
-
     paymentEnabled: true,
     amountPaid: { enabled: true },
     paymentMethod: { enabled: false },
@@ -123,7 +117,6 @@ const CreateBillTemplate = () => {
     totalDiscount: { enabled: true },
     totalBill: { enabled: true },
     outstandingAmount: { enabled: true },
-
     declarationEnabled: true,
     signature: { enabled: true },
     termsAndConditions: { enabled: true, value: "" },
@@ -156,11 +149,54 @@ const CreateBillTemplate = () => {
     });
   };
 
-  const handleSave = () => {
-    toast({
-      title: "Success",
-      description: "Bill template saved successfully",
-    });
+  const handleSave = async () => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to save a template",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!config.templateName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a template name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("bill_templates").insert({
+        user_id: user.id,
+        template_name: config.templateName,
+        pharmacy_enabled: config.pharmacyEnabled,
+        drug_license_enabled: config.drugLicenseEnabled,
+        patient_enabled: config.patientEnabled,
+        item_enabled: config.itemEnabled,
+        gst_enabled: config.gstEnabled,
+        payment_enabled: config.paymentEnabled,
+        declaration_enabled: config.declarationEnabled,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Bill template saved successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save template",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const ToggleField = ({ 
@@ -257,6 +293,20 @@ const CreateBillTemplate = () => {
         <span>Bill Template</span>
         <span>›</span>
         <span className="text-foreground font-medium">Create</span>
+      </div>
+
+      {/* Template Name Input */}
+      <div className="bg-card rounded-lg border border-border overflow-hidden mb-6">
+        <div className="p-6">
+          <Label htmlFor="templateName" className="font-semibold">Template Name</Label>
+          <Input
+            id="templateName"
+            value={config.templateName}
+            onChange={(e) => setConfig((prev) => ({ ...prev, templateName: e.target.value }))}
+            placeholder="Enter template name"
+            className="mt-2 max-w-md"
+          />
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -450,111 +500,173 @@ const CreateBillTemplate = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" className="text-primary border-primary" onClick={() => setPreviewOpen(true)}>
-            Preview Bill
+        <div className="flex justify-center gap-4 pt-4">
+          <Button variant="outline" onClick={() => setPreviewOpen(true)}>
+            Preview
           </Button>
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? "Saving..." : "Save"}
+          </Button>
         </div>
       </div>
 
-      {/* Bill Preview Modal */}
+      {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <div className="p-6 bg-card">
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold underline">Sales Invoice</h1>
-            </div>
-
-            <div className="flex justify-between mb-6">
-              <div>
-                <p><strong>Date:</strong> DD-MM-YYYY</p>
-                <p><strong>Invoice No:</strong> XXXXXXXXXXXX</p>
+          <div ref={printRef} className="p-8 bg-white text-black">
+            {/* Header */}
+            <div className="flex items-start justify-between border-b pb-4 mb-4">
+              <div className="flex items-center gap-4">
+                {config.pharmacyEnabled && config.logo.enabled && (
+                  <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                    <Logo />
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-xl font-bold">{profile?.pharmacy_name || "Pharmacy Name"}</h1>
+                  {config.pharmacyEnabled && config.address.enabled && (
+                    <p className="text-sm text-gray-600">{profile?.pharmacy_address || "Address"}</p>
+                  )}
+                  {config.pharmacyEnabled && config.gstin.enabled && (
+                    <p className="text-sm">GSTIN: {profile?.pharmacy_gst_number || "XXXXXXXX"}</p>
+                  )}
+                  {config.pharmacyEnabled && config.fssai.enabled && (
+                    <p className="text-sm">FSSAI: {profile?.fssai_id || "XXXXXXXX"}</p>
+                  )}
+                </div>
               </div>
-              <Logo />
-            </div>
-
-            <div className="grid grid-cols-2 gap-6 mb-6 border border-border p-4">
-              <div className="text-sm space-y-1">
-                <p>LOREM IPSUM, MAIN ROAD,</p>
-                <p>IPSUM</p>
-                <p>LOREMQFNKEQFQEBLF,XXXX</p>
-                <p>XXXXXXXXXXX</p>
-              </div>
-              <div className="text-sm space-y-1">
-                <p><strong>FSSAI:</strong> ABCXXXXX</p>
-                <p><strong>GSTIN:</strong> XXXXXXXXXXXX</p>
-                <p><strong>DL NUMBER 1:</strong> XXXXXXXXXXXX</p>
-                <p><strong>DL NUMBER 2:</strong> XXXXXXXXXXXX</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              <div>
-                <Label className="text-sm font-medium">Patient Name</Label>
-                <Input value="Lorem Ipsum" readOnly className="mt-1" />
-              </div>
-              <div>
-                <Label className="text-sm font-medium">Address</Label>
-                <Input value="Lorem Ipsum" readOnly className="mt-1" />
-              </div>
-              <div>
-                <Label className="text-sm font-medium">Phone Number</Label>
-                <Input value="+91 XXXXXXXXXX" readOnly className="mt-1" />
-              </div>
-              <div>
-                <Label className="text-sm font-medium">Doctor Name</Label>
-                <Input value="Lorem Ipsum" readOnly className="mt-1" />
+              <div className="text-right">
+                <p className="font-bold">INVOICE</p>
+                <p className="text-sm">Bill No: XXXX</p>
+                <p className="text-sm">Date: {new Date().toLocaleDateString()}</p>
               </div>
             </div>
 
-            <table className="w-full border border-border mb-6">
-              <thead>
-                <tr className="border-b border-border bg-muted/50">
-                  <th className="p-2 text-left text-sm font-semibold">ITEM</th>
-                  <th className="p-2 text-left text-sm font-semibold">QUANTITY</th>
-                  <th className="p-2 text-left text-sm font-semibold">HSN</th>
-                  <th className="p-2 text-left text-sm font-semibold">BATCH</th>
-                  <th className="p-2 text-left text-sm font-semibold">EXPIRY</th>
-                  <th className="p-2 text-left text-sm font-semibold">MRP</th>
-                  <th className="p-2 text-left text-sm font-semibold">GST %</th>
-                  <th className="p-2 text-left text-sm font-semibold">DISCOUNT %</th>
-                  <th className="p-2 text-left text-sm font-semibold">TOTAL</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="p-2"><Input value="Lorem Ipsum" readOnly className="h-8" /></td>
-                  <td className="p-2"><Input value="XX" readOnly className="h-8 w-16" /></td>
-                  <td className="p-2"><Input value="XXXXX" readOnly className="h-8 w-20" /></td>
-                  <td className="p-2"><Input value="XXXXX" readOnly className="h-8 w-20" /></td>
-                  <td className="p-2"><Input value="DD-MM-YYYY" readOnly className="h-8 w-24" /></td>
-                  <td className="p-2"><Input value="₹XXX" readOnly className="h-8 w-16" /></td>
-                  <td className="p-2"><Input value="XX" readOnly className="h-8 w-12" /></td>
-                  <td className="p-2"><Input value="XX" readOnly className="h-8 w-12" /></td>
-                  <td className="p-2"><Input value="₹XXX" readOnly className="h-8 w-16" /></td>
-                </tr>
-              </tbody>
-            </table>
+            {/* Drug License */}
+            {config.drugLicenseEnabled && (
+              <div className="mb-4 text-sm">
+                <p>DL No: {config.dlNumber1.value || profile?.dl_no || "XXXXXXXX"}</p>
+              </div>
+            )}
 
-            <div className="flex justify-between mb-6">
-              <div className="flex flex-col items-center">
-                <div className="w-32 h-16 border-b border-foreground mb-2"></div>
-                <p className="text-sm font-medium">Authorized Signature</p>
+            {/* Patient Information */}
+            {config.patientEnabled && (
+              <div className="mb-4 p-3 bg-gray-50 rounded">
+                <h3 className="font-semibold mb-2">Patient Details</h3>
+                <div className="grid grid-cols-3 gap-2 text-sm">
+                  {config.patientName.enabled && <p>Name: LOREM IPSUM</p>}
+                  {config.phoneNumber.enabled && <p>Phone: +91XXXXXXXXXX</p>}
+                  {config.age.enabled && <p>Age: XX</p>}
+                  {config.gender.enabled && <p>Gender: Male</p>}
+                  {config.patientAddress.enabled && <p>Address: Lorem Ipsum</p>}
+                  {config.doctorName.enabled && <p>Doctor: Dr. Lorem</p>}
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-sm italic mb-4">"GET WELL SOON BY NEXUS"</p>
-                <p className="text-sm font-semibold">Terms & Conditions</p>
-                <p className="text-sm">Confirm Medicines from your Doctor before use</p>
+            )}
+
+            {/* Items Table */}
+            {config.itemEnabled && (
+              <table className="w-full mb-4 text-sm">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-2 text-left">S.No</th>
+                    {config.itemName.enabled && <th className="p-2 text-left">Item Name</th>}
+                    {config.batch.enabled && <th className="p-2 text-left">Batch</th>}
+                    {config.expiry.enabled && <th className="p-2 text-left">Expiry</th>}
+                    {config.quantity.enabled && <th className="p-2 text-left">Qty</th>}
+                    {config.mrp.enabled && <th className="p-2 text-left">MRP</th>}
+                    {config.gstPercent.enabled && <th className="p-2 text-left">GST%</th>}
+                    {config.discount.enabled && <th className="p-2 text-left">Disc</th>}
+                    {config.total.enabled && <th className="p-2 text-left">Total</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[1, 2, 3].map((i) => (
+                    <tr key={i} className="border-b">
+                      <td className="p-2">{i}</td>
+                      {config.itemName.enabled && <td className="p-2">Item {i}</td>}
+                      {config.batch.enabled && <td className="p-2">B00{i}</td>}
+                      {config.expiry.enabled && <td className="p-2">12/2025</td>}
+                      {config.quantity.enabled && <td className="p-2">10</td>}
+                      {config.mrp.enabled && <td className="p-2">₹100</td>}
+                      {config.gstPercent.enabled && <td className="p-2">18%</td>}
+                      {config.discount.enabled && <td className="p-2">5%</td>}
+                      {config.total.enabled && <td className="p-2">₹1000</td>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* GST Information */}
+            {config.gstEnabled && (
+              <div className="mb-4 p-3 bg-gray-50 rounded text-sm">
+                <h3 className="font-semibold mb-2">GST Details</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {config.cgst.enabled && <p>CGST: ₹XXX</p>}
+                  {config.sgst.enabled && <p>SGST: ₹XXX</p>}
+                  {config.totalGst.enabled && <p>Total GST: ₹XXX</p>}
+                </div>
               </div>
-              <div className="text-right text-sm space-y-1">
-                <p><strong>Amount Paid:</strong> Rs.XXX.XX</p>
-                <p><strong>Total Discount:</strong> Rs.XXX.XX</p>
-                <p><strong>Total Bill:</strong> Rs.XXX.XX</p>
-                <p><strong>Outstanding Amt:</strong> Rs.XXX.XX</p>
-                <p><strong>PAYMENT STATUS:</strong> PARTIAL PAID</p>
+            )}
+
+            {/* Payment Information */}
+            {config.paymentEnabled && (
+              <div className="flex justify-end mb-4">
+                <div className="w-64 text-sm">
+                  {config.totalDiscount.enabled && (
+                    <div className="flex justify-between py-1">
+                      <span>Total Discount:</span>
+                      <span>₹XXX</span>
+                    </div>
+                  )}
+                  {config.totalBill.enabled && (
+                    <div className="flex justify-between py-1 font-bold border-t">
+                      <span>Total:</span>
+                      <span>₹XXXX</span>
+                    </div>
+                  )}
+                  {config.amountPaid.enabled && (
+                    <div className="flex justify-between py-1">
+                      <span>Amount Paid:</span>
+                      <span>₹XXXX</span>
+                    </div>
+                  )}
+                  {config.outstandingAmount.enabled && (
+                    <div className="flex justify-between py-1">
+                      <span>Outstanding:</span>
+                      <span>₹0</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Declaration */}
+            {config.declarationEnabled && (
+              <div className="mt-8 pt-4 border-t text-sm">
+                {config.termsAndConditions.enabled && config.termsAndConditions.value && (
+                  <p className="text-xs text-gray-600 mb-4">{config.termsAndConditions.value}</p>
+                )}
+                {config.remark.enabled && config.remark.value && (
+                  <p className="text-xs text-gray-600 mb-4">Remark: {config.remark.value}</p>
+                )}
+                {config.signature.enabled && (
+                  <div className="flex justify-end">
+                    <div className="text-center">
+                      <div className="w-32 border-b border-gray-400 mb-1"></div>
+                      <p className="text-xs">Authorized Signature</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex justify-center gap-4 pt-4">
+            <Button variant="outline" onClick={() => setPreviewOpen(false)}>
+              Close
+            </Button>
+            <Button onClick={() => handlePrint()}>Print</Button>
           </div>
         </DialogContent>
       </Dialog>

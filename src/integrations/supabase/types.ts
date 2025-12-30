@@ -14,6 +14,169 @@ export type Database = {
   }
   public: {
     Tables: {
+      bill_items: {
+        Row: {
+          batch_no: string | null
+          bill_id: string
+          created_at: string
+          gst_percent: number | null
+          id: string
+          item_name: string
+          quantity: number
+          total_price: number
+          unit: string
+          unit_price: number
+          user_id: string
+        }
+        Insert: {
+          batch_no?: string | null
+          bill_id: string
+          created_at?: string
+          gst_percent?: number | null
+          id?: string
+          item_name: string
+          quantity?: number
+          total_price?: number
+          unit: string
+          unit_price?: number
+          user_id: string
+        }
+        Update: {
+          batch_no?: string | null
+          bill_id?: string
+          created_at?: string
+          gst_percent?: number | null
+          id?: string
+          item_name?: string
+          quantity?: number
+          total_price?: number
+          unit?: string
+          unit_price?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bill_items_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "bills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bill_templates: {
+        Row: {
+          created_at: string
+          declaration_enabled: boolean
+          drug_license_enabled: boolean
+          gst_enabled: boolean
+          id: string
+          item_enabled: boolean
+          patient_enabled: boolean
+          payment_enabled: boolean
+          pharmacy_enabled: boolean
+          template_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          declaration_enabled?: boolean
+          drug_license_enabled?: boolean
+          gst_enabled?: boolean
+          id?: string
+          item_enabled?: boolean
+          patient_enabled?: boolean
+          payment_enabled?: boolean
+          pharmacy_enabled?: boolean
+          template_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          declaration_enabled?: boolean
+          drug_license_enabled?: boolean
+          gst_enabled?: boolean
+          id?: string
+          item_enabled?: boolean
+          patient_enabled?: boolean
+          payment_enabled?: boolean
+          pharmacy_enabled?: boolean
+          template_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bills: {
+        Row: {
+          bill_date: string
+          bill_number: string
+          created_at: string
+          discount: number
+          doctor_name: string | null
+          gst_amount: number
+          id: string
+          patient_address: string | null
+          patient_name: string
+          patient_phone: string | null
+          payment_method: string | null
+          payment_status: string
+          subtotal: number
+          template_id: string | null
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bill_date?: string
+          bill_number: string
+          created_at?: string
+          discount?: number
+          doctor_name?: string | null
+          gst_amount?: number
+          id?: string
+          patient_address?: string | null
+          patient_name: string
+          patient_phone?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          subtotal?: number
+          template_id?: string | null
+          total_amount?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bill_date?: string
+          bill_number?: string
+          created_at?: string
+          discount?: number
+          doctor_name?: string | null
+          gst_amount?: number
+          id?: string
+          patient_address?: string | null
+          patient_name?: string
+          patient_phone?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          subtotal?: number
+          template_id?: string | null
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bills_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "bill_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       distributors: {
         Row: {
           address: string
