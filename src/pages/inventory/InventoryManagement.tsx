@@ -210,7 +210,7 @@ const InventoryManagement = () => {
   };
 
   return (
-    <DashboardLayout breadcrumbs={["Inventory"]}>
+    <DashboardLayout breadcrumbs={["Inventory", "Create"]}>
       <div className="space-y-6">
         {/* Material Information Tab */}
         <div className="bg-card rounded-lg border border-border overflow-hidden">

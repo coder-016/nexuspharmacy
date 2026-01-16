@@ -38,6 +38,9 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
   const location = useLocation();
   const { user, profile, loading, signOut, refreshProfile } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [inventoryOpen, setInventoryOpen] = useState(
+    location.pathname.includes("/dashboard/inventory")
+  );
   const [distributorsOpen, setDistributorsOpen] = useState(
     location.pathname.includes("/dashboard/distributors")
   );
@@ -93,7 +96,6 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
 
   const sidebarItems = [
     { icon: User, label: "Profile", path: "/dashboard/profile" },
-    { icon: Package, label: "Inventory", path: "/dashboard/inventory" },
     { icon: Users, label: "Customers", path: "/dashboard/customers" },
     { icon: BarChart3, label: "Statistics", path: "/dashboard/statistics" },
     { icon: FileSpreadsheet, label: "GST Reports", path: "/dashboard/gst-reports" },
@@ -201,20 +203,78 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
           </div>
 
           <nav className="px-3 space-y-1">
-            {sidebarItems.slice(0, 3).map((item, index) => (
-              <Link
-                key={index}
-                to={item.path}
+            {/* Profile Link */}
+            <Link
+              to="/dashboard/profile"
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                location.pathname === "/dashboard/profile"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <User className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span>Profile</span>}
+            </Link>
+
+            {/* Inventory Dropdown */}
+            <Collapsible open={inventoryOpen} onOpenChange={setInventoryOpen}>
+              <CollapsibleTrigger
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  location.pathname === item.path
-                    ? "bg-primary text-primary-foreground"
+                  location.pathname.includes("/dashboard/inventory")
+                    ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {sidebarOpen && <span>{item.label}</span>}
-              </Link>
-            ))}
+                <Package className="w-5 h-5 flex-shrink-0" />
+                {sidebarOpen && (
+                  <>
+                    <span className="flex-1 text-left">Inventory</span>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${
+                        inventoryOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </>
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pl-8 space-y-1 mt-1">
+                <Link
+                  to="/dashboard/inventory/create"
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    location.pathname === "/dashboard/inventory/create"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <Plus className="w-4 h-4" />
+                  {sidebarOpen && <span>Create</span>}
+                </Link>
+                <Link
+                  to="/dashboard/inventory"
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    location.pathname === "/dashboard/inventory"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <List className="w-4 h-4" />
+                  {sidebarOpen && <span>Get</span>}
+                </Link>
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Customers Link */}
+            <Link
+              to="/dashboard/customers"
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                location.pathname.includes("/dashboard/customers")
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <Users className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span>Customers</span>}
+            </Link>
 
             {/* Bill Template Dropdown */}
             <Collapsible open={billTemplateOpen} onOpenChange={setBillTemplateOpen}>
@@ -357,20 +417,31 @@ const DashboardLayout = ({ children, breadcrumbs = [] }: DashboardLayoutProps) =
               </CollapsibleContent>
             </Collapsible>
 
-            {sidebarItems.slice(3).map((item, index) => (
-              <Link
-                key={index + 3}
-                to={item.path}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  location.pathname === item.path
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {sidebarOpen && <span>{item.label}</span>}
-              </Link>
-            ))}
+            {/* Statistics Link */}
+            <Link
+              to="/dashboard/statistics"
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                location.pathname === "/dashboard/statistics"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <BarChart3 className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span>Statistics</span>}
+            </Link>
+
+            {/* GST Reports Link */}
+            <Link
+              to="/dashboard/gst-reports"
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                location.pathname.includes("/dashboard/gst-reports")
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <FileSpreadsheet className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span>GST Reports</span>}
+            </Link>
           </nav>
 
           <div className="absolute bottom-4 left-0 w-full px-3">

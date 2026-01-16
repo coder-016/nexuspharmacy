@@ -117,7 +117,7 @@ const GetInventoryList = () => {
   };
 
   return (
-    <DashboardLayout breadcrumbs={["Get Inventory", "Results"]}>
+    <DashboardLayout breadcrumbs={["Inventory", "Get"]}>
       <div className="space-y-4">
         {/* Search Form */}
         <div className="bg-card rounded-lg border border-border p-4 shadow-sm">
