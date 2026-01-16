@@ -21,6 +21,8 @@ import CreateReceiveOrder from "./pages/receive-orders/CreateReceiveOrder";
 import GetReceiveOrders from "./pages/receive-orders/GetReceiveOrders";
 import CreatePurchaseOrder from "./pages/purchase-orders/CreatePurchaseOrder";
 import GetPurchaseOrders from "./pages/purchase-orders/GetPurchaseOrders";
+import CreateIssueOrder from "./pages/issue-orders/CreateIssueOrder";
+import GetIssueOrders from "./pages/issue-orders/GetIssueOrders";
 import CreateBillTemplate from "./pages/bill-template/CreateBillTemplate";
 import GetBillTemplate from "./pages/bill-template/GetBillTemplate";
 import Statistics from "./pages/statistics/Statistics";
@@ -53,6 +55,8 @@ const App = () => (
             <Route path="/dashboard/receive-orders" element={<GetReceiveOrders />} />
             <Route path="/dashboard/purchase-orders/create" element={<CreatePurchaseOrder />} />
             <Route path="/dashboard/purchase-orders" element={<GetPurchaseOrders />} />
+            <Route path="/dashboard/issue-orders/create" element={<CreateIssueOrder />} />
+            <Route path="/dashboard/issue-orders" element={<GetIssueOrders />} />
             <Route path="/dashboard/bill-template/create" element={<CreateBillTemplate />} />
             <Route path="/dashboard/bill-template" element={<GetBillTemplate />} />
             <Route path="/dashboard/statistics" element={<Statistics />} />
