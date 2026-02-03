@@ -267,6 +267,80 @@ export type Database = {
         }
         Relationships: []
       }
+      issue_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          issue_order_id: string
+          item_id: string
+          item_name: string
+          quantity: number
+          remark: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          issue_order_id: string
+          item_id: string
+          item_name: string
+          quantity?: number
+          remark?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          issue_order_id?: string
+          item_id?: string
+          item_name?: string
+          quantity?: number
+          remark?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issue_order_items_issue_order_id_fkey"
+            columns: ["issue_order_id"]
+            isOneToOne: false
+            referencedRelation: "issue_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      issue_orders: {
+        Row: {
+          created_at: string
+          employee_name: string
+          employee_type: string
+          id: string
+          issue_date: string
+          remark: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_name: string
+          employee_type: string
+          id?: string
+          issue_date?: string
+          remark?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_name?: string
+          employee_type?: string
+          id?: string
+          issue_date?: string
+          remark?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
