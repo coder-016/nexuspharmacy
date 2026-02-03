@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import CreateDistributor from "./pages/distributors/CreateDistributor";
 import GetDistributors from "./pages/distributors/GetDistributors";
 import CustomerSearch from "./pages/customers/CustomerSearch";
+import CreateCustomer from "./pages/customers/CreateCustomer";
 import CustomerList from "./pages/customers/CustomerList";
 import GstReportSearch from "./pages/gst-reports/GstReportSearch";
 import GstReportList from "./pages/gst-reports/GstReportList";
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/dashboard/distributors/create" element={<CreateDistributor />} />
             <Route path="/dashboard/distributors" element={<GetDistributors />} />
             <Route path="/dashboard/customers" element={<CustomerSearch />} />
+            <Route path="/dashboard/customers/create" element={<CreateCustomer />} />
             <Route path="/dashboard/customers/list" element={<CustomerList />} />
             <Route path="/dashboard/gst-reports" element={<GstReportSearch />} />
             <Route path="/dashboard/gst-reports/list" element={<GstReportList />} />
